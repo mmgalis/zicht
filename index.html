@@ -4,7 +4,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>Viewshed</title>
+  <title>Zichtlijnen</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
   <style>
     html,
     body,
@@ -45,7 +49,15 @@
       "esri/analysis/Viewshed",
       "esri/layers/SceneLayer",
       "esri/widgets/Daylight",
-      "esri/widgets/Expand"
+      "esri/widgets/Expand",
+      "esri/Basemap",
+      "esri/widgets/BasemapGallery",
+      "esri/widgets/Search",
+      "esri/widgets/LineOfSight",
+      "esri/widgets/Expand",
+      "esri/geometry/Point",
+      "esri/Graphic",
+      "esri/core/reactiveUtils"
     ], function(
       Map,
       SceneView,
@@ -57,7 +69,15 @@
       Viewshed,
       SceneLayer,
       Daylight,
-      Expand
+      Expand,
+      Basemap,
+      BasemapGallery,
+      Search, 
+      LineOfSight, 
+      Expand, 
+      Point, 
+      Graphic, 
+      reactiveUtils
     ) {
       const view = new SceneView({
         container: "viewDiv",
@@ -182,7 +202,16 @@
         view.ui.add("viewshedComponent", "bottom-right");
       });
       
-             /**************************************
+        const searchWidget = new Search({
+          view: view
+        });
+
+        // Add the search widget to the top right corner of the view
+        view.ui.add(searchWidget, {
+          position: "top-right"
+        });
+      
+       /**************************************
        * Initialize the daylight widget
        **************************************/
 
@@ -197,7 +226,9 @@
       });
 
       // Add widget inside an Expand widget to be able to hide it on    devices with small screens
-      view.ui.add(new Expand({ content: daylight, view: view, expanded: false }), "top-right"); //top-right
+      view.ui.add(new Expand({ content: daylight, view: view, expanded: false }), "bottom-left"); //top-right
+      
+
       
     });
     
@@ -208,10 +239,10 @@
 <body>
   <div id="viewDiv"></div>
   <calcite-card id="viewshedComponent">
-    <calcite-button id="createButton">Create viewshed</calcite-button>
+    <calcite-button id="createButton">Maak nieuwe zichtlijn</calcite-button>
     <calcite-button id="cancelButton" style="display:none">Cancel </calcite-button>
     <div id="promptText" style="display: none">
-      <em>Start the analysis by clicking in the scene to place the observer point and set the target.</em>
+      <em>Start de analyse door te klikken waar de observant staat en vervolgens in de richting van de target te bewegen.</em>
     </div>
   </calcite-card>
 </body>
