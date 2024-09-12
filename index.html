@@ -382,7 +382,7 @@ daylightExpand.domNode.id = "daylight-tour-step";
                 { 
                     element: '.esri-ui-top-left',
                     title: 'Navigatie',
-                    intro: "Hiermee kan je in- en uitzoomen, verplaatsen en roteren. <br> <br> <b> Tip: </b> <br> Je kan ook verplaatsen door met je linkermuisknop te slepen. Roteren doe je door je rechtermuisknop ingedrukt te houden en met je linkermuisknop te slepen."
+                    intro: "Hiermee kan je in- en uitzoomen, verplaatsen en roteren. <br> <br> <b> Tip: </b> <br> Je kan ook inzoomen met het scrollwiel van je muis. <br> Verplaatsen doe je door met je linkermuisknop te slepen. <br> Roteren doe je door je rechtermuisknop te slepen. "
                 },
                 { 
                     element: '.esri-ui-bottom-left',
@@ -402,13 +402,13 @@ daylightExpand.domNode.id = "daylight-tour-step";
                 { 
                     element: '#viewshedComponent',
                     title: 'Nieuwe zichtlijn', 
-                    intro: "Klik hier om een nieuwe zichtlijn te maken. Alles wat zichtbaar is wordt groen en de rest rood. <br> <br> <b> Stap voor stap: </b> <br> 1. Klik op de locatie observant. <br><br> 2. Sleep zichtlijn in gewenste richting. <br><br> 3. Pas de grootte van de horzintale en verticale hoek aan door de oranje lijnen (aan het uiteinde van de zichtlijn) te slepen."
+                    intro: "Klik hier om een nieuwe zichtlijn te maken. Alles wat zichtbaar is wordt groen en de rest rood. <br> <br> <b> Stap voor stap: </b> <br> 1. Klik op de locatie van de observant. <br><br> 2. Sleep de zichtlijn in de gewenste richting. <br><br> 3. Pas de grootte van de horzintale en verticale hoek aan door de blauwe lijnen (aan het uiteinde van de zichtlijn) te slepen."
                 },
                 {
                     position: 'right',
                     tooltipClass: 'custom-tooltip',
                     title: 'Zichtlijn verwijderen',
-                    intro: 'Je kan oude zichtlijnen gemakkelijk verwijderen. <br> <br> <b> Stap voor stap: </b> <br> 1. Selecteer de oude zichtlijn door op de oranje cirkel op de plaats van de observant te klikken, in de huidige zichtlijn is dat het midden. <br> <br> 2. Druk op de knop delete of backspace. <br> <br> Tijd om te beginnen!'
+                    intro: 'Je kan oude zichtlijnen gemakkelijk verwijderen. <br> <br> <b> Stap voor stap: </b> <br> 1. Selecteer de oude zichtlijn door op de blauwe cirkel op de plaats van de observant te klikken, in de huidige zichtlijn is dat het midden. <br> <br> 2. Druk op de knop delete of backspace. <br> <br> Tijd om te beginnen!'
                 }
       // Add more steps as needed
             ],
@@ -419,6 +419,11 @@ daylightExpand.domNode.id = "daylight-tour-step";
             showProgress: false,
             showBullets: true
         }).start(); 
+
+        view.theme = {
+          accentColor: [0, 82, 161, 1], //[0, 147, 217, 1],
+          textColor: [24, 40, 102, 1] //"green"
+        };
       
     });
     
