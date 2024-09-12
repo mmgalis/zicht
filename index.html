@@ -33,7 +33,31 @@
     #promptText {
       margin-top: 0.4rem;
     }
+    .custom-tooltip .introjs-arrow {
+    left: 50%; /* Center the arrow horizontally */
+    transform: translateX(-50%);
+    }
+
+    .custom-tooltip {
+    transform: translateX(63%) translateY(31%); /* Adjust tooltip position */
+    }
+
+
+
+/* Arrow positioning */
+.custom-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 25%; /* Centers the arrow vertically */
+    left: -20px; /* Places the arrow on the left side of the tooltip */
+    transform: translateY(-50%); /* Adjusts to vertically center the arrow */
+    border-width: 10px;
+    border-style: solid;
+    border-color: transparent white transparent transparent; /* Makes the left side of the arrow white */
+}
   </style>
+  <link href="https://unpkg.com/intro.js/minified/introjs.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script>
   <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css" />
   <script src="https://js.arcgis.com/4.30/"></script>
   <script type="module" src="https://js.arcgis.com/calcite-components/2.11.1/calcite.esm.js"></script>
@@ -41,6 +65,7 @@
   <script>
     require([
       "esri/Map",
+      "esri/WebScene",
       "esri/views/SceneView",
       "esri/geometry/SpatialReference",
       "esri/core/promiseUtils",
@@ -58,9 +83,11 @@
       "esri/widgets/Expand",
       "esri/geometry/Point",
       "esri/Graphic",
-      "esri/core/reactiveUtils"
+      "esri/core/reactiveUtils",
+      "esri/widgets/Fullscreen"
     ], function(
       Map,
+      WebScene,
       SceneView,
       SpatialReference,
       promiseUtils,
@@ -78,8 +105,16 @@
       Expand, 
       Point, 
       Graphic, 
-      reactiveUtils
+      reactiveUtils,
+      Fullscreen
     ) {
+      const scene = new WebScene({
+          portalItem: {
+            // autocasts as new PortalItem()
+            id: "586e62704afc441ead838a4abfafc2f8" //"3a9976baef9240ab8645ee25c7e9c096"
+          }
+        });
+
       const view = new SceneView({
         container: "viewDiv",
         camera: {
@@ -92,10 +127,7 @@
           heading: 1.2311944909542853,
           tilt: 70.07900968078631
         },
-        map: new Map({
-          basemap: "topo-3d",
-          ground: "world-elevation"
-        }),
+        map: scene, //new Map({basemap: "topo-3d", ground: "world-elevation"}),
         environment: {
           lighting: new SunLighting({
             date: new Date("June 18, 2024 12:50:00 UTC-6"),
@@ -110,7 +142,7 @@
         const labelsLayer = view.map.basemap.referenceLayers.find(
           (layer) => layer.title === "Places and Labels"
         );
-        labelsLayer.visible = false;
+        labelsLayer.visible = true; //false
         // Create the viewshed shape.
         const viewshed = new Viewshed({
           observer: {
@@ -203,14 +235,85 @@
         view.ui.add("viewshedComponent", "bottom-right");
       });
       
+        /**************************************
+       * Initialize the search widget
+       **************************************/
+
         const searchWidget = new Search({
-          view: view
+          allPlaceholder: "Zoek op plaats of adres",
+          view: view,
+          locationEnabled: false
         });
+
+        const sources = [{
+            locator: {
+              url: "https://nominatim.openstreetmap.org/search",  // Nominatim API endpoint
+              countryCode: 'nl',
+              placeholder: "Zoek met Nominatim",
+              query: function (params) {
+        // Customize this function for the request format used by Nominatim
+        const queryString = `q=${encodeURIComponent(params.suggestTerm)}&format=json&addressdetails=1&limit=5`;
+        const searchUrl = `https://nominatim.openstreetmap.org/search?${queryString}`;
+
+        // Perform the fetch request
+        return fetch(searchUrl)
+          .then(response => response.json())
+          .then(data => {
+            return data.map(result => ({
+              name: result.display_name,
+              extent: [
+                [result.boundingbox[2], result.boundingbox[0]],
+                [result.boundingbox[3], result.boundingbox[1]]
+              ],
+              feature: {
+                geometry: {
+                  type: "point",
+                  longitude: result.lon,
+                  latitude: result.lat
+                },
+                attributes: result
+              }
+            }));
+          });
+      },
+    },
+    name: "Nominatim (OpenStreetMap)", //"Geocoding Service",
+    placeholder: "Zoek op plaats of adres",
+    maxResults: 5,
+    maxSuggestions: 6,
+    suggestionsEnabled: true,
+    minSuggestCharacters: 3
+}];
+
+        searchWidget.sources = sources;
 
         // Add the search widget to the top right corner of the view
         view.ui.add(searchWidget, {
-          position: "top-right"
+          position: "bottom-left"
         });
+
+        // Find the search widget in the DOM and assign an ID
+        const searchElement = view.ui.find("search");
+        if (searchElement) {
+          searchElement.container.id = "search-tour-step";
+        }
+
+         /**************************************
+       * Initialize the fullscreen widget
+       **************************************/
+
+        fullscreen = new Fullscreen({
+          view: view
+        });
+
+        view.ui.add(fullscreen, "top-right");
+
+        
+        // Find the fullscreen widget in the DOM and assign an ID
+        const fullscreenElement = view.ui.find("fullscreen");  
+        if (fullscreenElement) {
+            fullscreenElement.container.id = "fullscreen-tour-step";
+        }
       
        /**************************************
        * Initialize the daylight widget
@@ -226,10 +329,96 @@
         }
       });
 
-      // Add widget inside an Expand widget to be able to hide it on    devices with small screens
-      view.ui.add(new Expand({ content: daylight, view: view, expanded: false }), "bottom-left"); //top-right
-      
+      // Add widget inside an Expand widget to be able to hide it on devices with small screens
+        const daylightExpand = new Expand({ 
+          content: daylight, 
+            view: view, 
+            expanded: false 
+        });
+        
+        view.ui.add(daylightExpand, "top-right");
 
+// Assign an ID to the Expand widget's DOM node for the daylight widget
+daylightExpand.domNode.id = "daylight-tour-step";
+
+      /**************************************
+       * Initialize the basemap widget
+       **************************************/
+      
+      const basemapGallery = new BasemapGallery({
+          view: view,
+          source: [
+            Basemap.fromId("topo-vector"), 
+            Basemap.fromId("hybrid"),
+            Basemap.fromId("topo-3d")
+           ] // autocasts to LocalBasemapsSource
+        });
+
+      const basemapExpand = new Expand({
+        expandIcon: "layers",
+        view: view,
+        content: basemapGallery
+      })
+
+
+        // Add the widget to the top-right corner of the view
+        view.ui.add(basemapExpand, {
+          position: "top-right"
+        });
+
+        basemapExpand.domNode.id = "basemap-tour-step";
+
+        /**************************************
+       * Initialize the Intro.js tour
+       **************************************/
+
+        // Define steps
+        introJs().setOptions({
+            steps: [
+                { 
+                    title: 'Welkom',
+                    intro: "Klik op <b> verder </b> als je een korte uitleg wilt over hoe alles werkt en wat mogelijk is. <br> <br> Klik op het kruisje <b> x </b> rechtsboven om meteen te beginnen." 
+                },
+                { 
+                    element: '.esri-ui-top-left',
+                    title: 'Navigatie',
+                    intro: "Hiermee kan je in- en uitzoomen, verplaatsen en roteren. <br> <br> <b> Tip: </b> <br> Je kan ook verplaatsen door met je linkermuisknop te slepen. Roteren doe je door je rechtermuisknop ingedrukt te houden en met je linkermuisknop te slepen."
+                },
+                { 
+                    element: '.esri-ui-bottom-left',
+                    title: 'Zoeken',
+                    intro: "Het is nog makkelijker om de gewenste locaties op te zoeken, je wordt dan direct naar de juiste locatie gebracht. <br> <br> Je kan zoeken op plaats, adres of postcode, maar ook op namen van bekende plaatsen (bijvoorbeeld <i> het Rijksmuseum</i>)."
+                },
+                { 
+                    element: '#basemap-tour-step',
+                    title: 'Ondergrond',
+                    intro: "Klik hier om een andere kaart als ondergrond te kiezen (bijvoorbeeld een luchtfoto). <br> <br> <b> Let op: </b> <br> Alleen als je een zichtlijn in het <b>buitenland</b> wilt maken, moet je hier de meest rechter kaart kiezen (Topographic 3D). In Nederland kan je deze beter niet gebruiken, aangezien deze minder nauwkeurig is."
+                },
+                { 
+                    element: '#daylight-tour-step',
+                    title: 'Belichting',
+                    intro: "Klik hier om de belichting aan te passen. <br> <br> <b> Tip: </b> <br> Je kan zelfs een specifieke dag en tijdstip aangeven."
+                },
+                { 
+                    element: '#viewshedComponent',
+                    title: 'Nieuwe zichtlijn', 
+                    intro: "Klik hier om een nieuwe zichtlijn te maken. Alles wat zichtbaar is wordt groen en de rest rood. <br> <br> <b> Stap voor stap: </b> <br> 1. Klik op de locatie observant. <br><br> 2. Sleep zichtlijn in gewenste richting. <br><br> 3. Pas de grootte van de horzintale en verticale hoek aan door de oranje lijnen (aan het uiteinde van de zichtlijn) te slepen."
+                },
+                {
+                    position: 'right',
+                    tooltipClass: 'custom-tooltip',
+                    title: 'Zichtlijn verwijderen',
+                    intro: 'Je kan oude zichtlijnen gemakkelijk verwijderen. <br> <br> <b> Stap voor stap: </b> <br> 1. Selecteer de oude zichtlijn door op de oranje cirkel op de plaats van de observant te klikken, in de huidige zichtlijn is dat het midden. <br> <br> 2. Druk op de knop delete of backspace. <br> <br> Tijd om te beginnen!'
+                }
+      // Add more steps as needed
+            ],
+            nextLabel: 'Verder', // Changes 'Next' to 'Volgende'
+            prevLabel: 'Terug', // Changes 'Back' to 'Sla over'
+            skipLabel: 'x', // Changes 'Skip' to 'Overslaan'
+            doneLabel: 'Klaar', // Changes 'Done' to 'Klaar'
+            showProgress: false,
+            showBullets: true
+        }).start(); 
       
     });
     
