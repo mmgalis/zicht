@@ -1,0 +1,5 @@
+import{A as o,d as t}from"./action-group-Sv8U5VqZ.js";import"./index-BqUMRVrI.js";import"./conditionalSlot-CIAIgkOK.js";import"./observers-D2XJQciW.js";import"./loadable-BDFI60py.js";import"./locale-DkpMQtGv.js";import"./dom-BtaRyJrQ.js";import"./key-D5DPfjW0.js";import"./t9n-cwdm_byc.js";import"./action-menu-BNEyXJ2G.js";import"./array-DofFqflK.js";import"./action-w4RT-B0f.js";import"./interactive-DvHlr4U7.js";import"./component-ByvC-PUv.js";import"./icon-DM3-NsSk.js";import"./loader-BH7VTwzk.js";import"./popover-qd8bBojP.js";import"./floating-ui-CzmAM8sA.js";import"./debounce-C5YDvsuO.js";import"./focusTrapComponent-1p2BtZ7b.js";import"./openCloseComponent-99mDQmFl.js";import"./Heading-DfF0BUh8.js";import"./FloatingArrow-B6nCowOd.js";/*!
+ * All material copyright ESRI, All Rights Reserved, unless otherwise specified.
+ * See https://github.com/Esri/calcite-design-system/blob/dev/LICENSE.md for details.
+ * v2.12.2
+ */const k=o,q=t;export{k as CalciteActionGroup,q as defineCustomElement};
