@@ -1,0 +1,1 @@
+import{fk as m,gt as i,b7 as n}from"./index-Mg4rAR0g.js";import{p}from"./queryTopFeatures-Dbs5G_lX.js";async function d(r,t,a,o){const e=m(r),f={...o},{data:s}=await p(e,i.from(t),a,f);return n.fromJSON(s)}export{d as executeTopFeaturesQuery};

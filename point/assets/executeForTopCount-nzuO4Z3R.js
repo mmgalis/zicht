@@ -1,0 +1,1 @@
+import{fk as n,gt as c}from"./index-Mg4rAR0g.js";import{c as f}from"./queryTopFeatures-Dbs5G_lX.js";async function e(o,t,r){const a=n(o);return(await f(a,c.from(t),{...r})).data.count}export{e as executeForTopCount};
